@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Fundo branco da linha; o app tinge com a cor do hábito (setColorFilter) quando concluído. -->
+<!-- Fundo da linha (claro/escuro conforme o tema do aparelho); o app tinge com a cor do hábito (setColorFilter) quando concluído. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#FFFFFFFF" />
+    <solid android:color="@color/widget_row" />
     <corners android:radius="14dp" />
 </shape>

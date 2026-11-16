@@ -28,7 +28,7 @@
             android:fontFamily="sans-serif-medium"
             android:maxLines="1"
             android:text="@string/widget_title"
-            android:textColor="#FF1F2A24"
+            android:textColor="@color/widget_text"
             android:textSize="15sp"
             android:textStyle="bold" />
 
@@ -39,7 +39,7 @@
             android:layout_marginStart="8dp"
             android:fontFamily="sans-serif"
             android:maxLines="1"
-            android:textColor="#FF7B867F"
+            android:textColor="@color/widget_muted"
             android:textSize="12sp" />
     </LinearLayout>
 
@@ -63,7 +63,7 @@
             android:fontFamily="sans-serif"
             android:gravity="center"
             android:text="@string/widget_empty"
-            android:textColor="#FF7B867F"
+            android:textColor="@color/widget_muted"
             android:textSize="13sp"
             android:visibility="gone" />
     </FrameLayout>

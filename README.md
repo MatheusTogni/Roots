@@ -22,12 +22,14 @@ App Android para acompanhar hábitos pela consistência, não pela cobrança. Ca
 - **Registro do dia** — a lista "Hoje" marca e desmarca cada hábito com um toque; salva na hora e o quadradinho muda de cor com uma animação discreta. Cada hábito tem um registro independente por data e não é preciso concluir todos.
 - **Gerenciar hábitos** — criar, editar nome/ícone/cor e excluir (com confirmação avisando que os registros também serão excluídos). Mudar a cor recolore o calendário sem mexer no histórico.
 - **Widget "Meus hábitos"** — lista os hábitos do dia na tela inicial, com a cor de cada um, e permite marcar/desmarcar sem abrir o app. Redimensionável, rolável e com várias instâncias; todas ficam sincronizadas com o app.
+- **Modo escuro** — o botão 🌓 no topo abre **Aparência**: *Automático* (acompanha o aparelho e troca sozinho quando ele muda), *Claro* ou *Escuro*. A escolha vale para o app, os diálogos e o widget. No escuro, o calendário mantém as cores dos hábitos sobre um fundo verde quase preto.
 - **Novo dia, hábitos pendentes** — cada conclusão pertence a uma data, então à meia-noite os hábitos voltam a aparecer pendentes sem apagar nada do histórico.
 
 ## Destaques técnicos
 
 - **100% Kotlin e SDK do Android, sem nenhuma biblioteca externa** — nem AndroidX. O APK fica pequeno e não há dependência para atualizar.
 - **Interface montada em código**, sem XML de layout, com um pequeno conjunto de componentes próprios (cards, botões, campos, `CheckCircle`). O calendário é uma `View` própria desenhada em `Canvas` ([`ContributionGraph.kt`](app/src/main/java/com/roots/app/ui/ContributionGraph.kt)). A exceção são os layouts do widget, que o Android só aceita em XML (`RemoteViews`).
+- **Tema claro/escuro sem biblioteca** — a escolha fica em `SharedPreferences` ([`ThemeSettings`](app/src/main/java/com/roots/app/ui/ThemeSettings.kt)) e a paleta do app ([`Palette`](app/src/main/java/com/roots/app/ui/Theme.kt)) é resolvida a cada tela. No widget, o modo *Automático* usa cores de recurso (`values-night`), que o Android troca na hora junto com o aparelho; com *Claro* ou *Escuro* forçado, ele usa layouts sem cor fixa, pintados em código com a mesma paleta.
 - **Calendário calculado com `java.time`** ([`MonthWindow.kt`](app/src/main/java/com/roots/app/ui/MonthWindow.kt)): primeiro dia da semana, tamanho de cada mês, anos bissextos e virada de ano sem tabelas manuais.
 - **SQLite com `SQLiteOpenHelper`**, chave estrangeira com `ON DELETE CASCADE`, `UNIQUE (habit_id, date)`, índice por data e migração de schema versionada. Datas locais no formato `yyyy-MM-dd`.
 - **Banco como fonte de verdade** — app e widget usam o mesmo `Repository`; toda gravação avisa os widgets, então os dois nunca divergem.

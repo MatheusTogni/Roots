@@ -7,12 +7,14 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.StateListDrawable
 import android.os.Build
+import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
 import android.view.View
@@ -24,18 +26,54 @@ import android.widget.ScrollView
 import android.widget.TextView
 import com.roots.app.R
 
-/** Cores do Roots: papel quente, texto verde-escuro e o verde "raiz" como acento. */
+/**
+ * Cores do Roots. Claro: papel quente, texto verde-escuro e o verde "raiz" como acento.
+ * Escuro: fundo verde quase preto com as mesmas cores de destaque, mais claras onde precisam de contraste.
+ *
+ * O tema vem da escolha do usuário no app ([ThemeSettings]): claro, escuro ou, no automático, o do
+ * aparelho. Cada tela chama [use] antes de montar as views (o Android também recria a tela quando o tema
+ * do sistema muda), e as propriedades abaixo devolvem o tom do tema ativo.
+ */
 object Palette {
-    val BG = 0xFFF6F5F0.toInt()
-    val SURFACE = 0xFFFFFFFF.toInt()
-    val BORDER = 0xFFECEAE3.toInt()
-    val EMPTY_CELL = 0xFFE7E5DE.toInt()
-    val TEXT = 0xFF1F2A24.toInt()
-    val MUTED = 0xFF7B867F.toInt()
-    val ACCENT = 0xFF2F7D4F.toInt()
-    val ACCENT_SOFT = 0xFFE3F0E8.toInt()
-    val DANGER = 0xFFD1463F.toInt()
-    val INPUT_BG = 0xFFF3F2EC.toInt()
+    /** true quando o tema escuro está ativo. */
+    var dark: Boolean = false
+        private set
+
+    /** Resolve o tema ativo (escolha do app ou, no automático, o do aparelho). Chamar antes de criar views. */
+    fun use(context: Context) {
+        dark = when (ThemeSettings.mode(context)) {
+            ThemeMode.LIGHT -> false
+            ThemeMode.DARK -> true
+            ThemeMode.AUTO -> {
+                val night = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                night == Configuration.UI_MODE_NIGHT_YES
+            }
+        }
+    }
+
+    private fun pick(light: Long, night: Long): Int = (if (dark) night else light).toInt()
+
+    val BG: Int get() = pick(0xFFF6F5F0, 0xFF0F1411)
+    val SURFACE: Int get() = pick(0xFFFFFFFF, 0xFF18201B)
+    val BORDER: Int get() = pick(0xFFECEAE3, 0xFF28322C)
+    val EMPTY_CELL: Int get() = pick(0xFFE7E5DE, 0xFF2E3A33)
+    val TEXT: Int get() = pick(0xFF1F2A24, 0xFFE6EDE8)
+    val MUTED: Int get() = pick(0xFF7B867F, 0xFF8C988F)
+    val ACCENT: Int get() = pick(0xFF2F7D4F, 0xFF35895A)
+
+    /** Verde para texto sobre o fundo (mais claro no escuro, para manter o contraste). */
+    val ACCENT_TEXT: Int get() = pick(0xFF2F7D4F, 0xFF5FBF86)
+    val ACCENT_SOFT: Int get() = pick(0xFFE3F0E8, 0xFF1E3226)
+    val DANGER: Int get() = pick(0xFFD1463F, 0xFFE5655E)
+    val INPUT_BG: Int get() = pick(0xFFF3F2EC, 0xFF131A16)
+
+    /** Cor da ondulação (ripple) ao tocar: escura no claro, clara no escuro. */
+    val RIPPLE: Int get() = pick(0x1A000000, 0x26FFFFFF)
+
+    /** Opacidade do tom da cor do hábito atrás do emoji e nas seleções. */
+    val TINT_ALPHA: Int get() = if (dark) 0x40 else 0x2E
+
+    /** Branco fixo: marca de concluído e texto sobre o verde (não muda com o tema). */
     val WHITE = 0xFFFFFFFF.toInt()
 }
 
@@ -63,6 +101,17 @@ fun Context.dpf(v: Float): Float = v * resources.displayMetrics.density
 /** Mesma cor com outra opacidade (0..255). */
 fun withAlpha(color: Int, alpha: Int): Int = (alpha shl 24) or (color and 0x00FFFFFF)
 
+/** Cor [tint] (com a opacidade dela) aplicada sobre [base]; o resultado é uma cor opaca. */
+fun overlay(base: Int, tint: Int): Int {
+    val a = (tint ushr 24) / 255f
+    fun mix(shift: Int): Int {
+        val b = (base shr shift) and 0xFF
+        val t = (tint shr shift) and 0xFF
+        return (t * a + b * (1f - a) + 0.5f).toInt().coerceIn(0, 255)
+    }
+    return (0xFF shl 24) or (mix(16) shl 16) or (mix(8) shl 8) or mix(0)
+}
+
 fun rounded(color: Int, radius: Float, strokeColor: Int? = null, strokeWidth: Int = 0) =
     GradientDrawable().apply {
         setColor(color)
@@ -77,7 +126,7 @@ fun oval(color: Int, strokeColor: Int? = null, strokeWidth: Int = 0) =
         if (strokeColor != null) setStroke(strokeWidth, strokeColor)
     }
 
-fun ripple(base: Drawable, rippleColor: Int = 0x1A000000) =
+fun ripple(base: Drawable, rippleColor: Int = Palette.RIPPLE) =
     RippleDrawable(ColorStateList.valueOf(rippleColor), base, null)
 
 /** Encolhe um pouco a view enquanto ela está pressionada. */
@@ -144,10 +193,10 @@ fun Context.button(label: String, style: BtnStyle = BtnStyle.PRIMARY, onClick: (
         val radius = dpf(24f)
         val (bg, fg) = when (style) {
             BtnStyle.PRIMARY -> Pair(rounded(Palette.ACCENT, radius), Palette.WHITE)
-            BtnStyle.SECONDARY -> Pair(rounded(Palette.ACCENT_SOFT, radius), Palette.ACCENT)
-            BtnStyle.OUTLINE -> Pair(rounded(Palette.WHITE, radius, Palette.BORDER, dp(2)), Palette.TEXT)
-            BtnStyle.DANGER -> Pair(rounded(Palette.WHITE, radius, Palette.DANGER, dp(2)), Palette.DANGER)
-            BtnStyle.GHOST -> Pair(rounded(0x00000000, radius), Palette.ACCENT)
+            BtnStyle.SECONDARY -> Pair(rounded(Palette.ACCENT_SOFT, radius), Palette.ACCENT_TEXT)
+            BtnStyle.OUTLINE -> Pair(rounded(Palette.SURFACE, radius, Palette.BORDER, dp(2)), Palette.TEXT)
+            BtnStyle.DANGER -> Pair(rounded(Palette.SURFACE, radius, Palette.DANGER, dp(2)), Palette.DANGER)
+            BtnStyle.GHOST -> Pair(rounded(0x00000000, radius), Palette.ACCENT_TEXT)
         }
         background = ripple(bg)
         setTextColor(fg)
@@ -167,7 +216,7 @@ fun Context.input(hint: String, value: String = "", type: Int = INPUT_TEXT): Edi
         setHintTextColor(withAlpha(Palette.MUTED, 0x99))
         // Campo claro que ganha borda verde ao receber o foco.
         background = StateListDrawable().apply {
-            addState(intArrayOf(android.R.attr.state_focused), rounded(Palette.WHITE, dpf(14f), Palette.ACCENT, dp(2)))
+            addState(intArrayOf(android.R.attr.state_focused), rounded(Palette.SURFACE, dpf(14f), Palette.ACCENT, dp(2)))
             addState(intArrayOf(), rounded(Palette.INPUT_BG, dpf(14f), Palette.BORDER, dp(2)))
         }
         setPadding(dp(14), dp(12), dp(14), dp(12))
@@ -181,7 +230,7 @@ fun Context.field(label: String, view: View): LinearLayout = vertical().apply {
 }
 
 fun Context.dialogBuilder(): AlertDialog.Builder =
-    AlertDialog.Builder(this, R.style.AppDialog)
+    AlertDialog.Builder(this, if (Palette.dark) R.style.AppDialogDark else R.style.AppDialogLight)
 
 fun Context.confirm(title: String, message: String, okLabel: String, onDismiss: () -> Unit = {}, onOk: () -> Unit) {
     dialogBuilder()
@@ -203,14 +252,23 @@ abstract class RootsActivity : Activity() {
     private lateinit var frame: FrameLayout
     private lateinit var titleView: TextView
     private lateinit var subtitleView: TextView
+    private lateinit var headerRow: LinearLayout
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // O tema (claro/escuro) precisa estar definido antes de qualquer view ser criada.
+        Palette.use(this)
+        setTheme(if (Palette.dark) R.style.AppThemeDark else R.style.AppThemeLight)
+        super.onCreate(savedInstanceState)
+    }
 
     @Suppress("DEPRECATION")
     private fun styleSystemBars() {
         window.statusBarColor = Palette.BG
         window.navigationBarColor = Palette.BG
-        window.decorView.systemUiVisibility = window.decorView.systemUiVisibility or
-            View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or
-            View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        // Ícones escuros nas barras só no tema claro; no escuro ficam claros.
+        val lightBars = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        val flags = window.decorView.systemUiVisibility
+        window.decorView.systemUiVisibility = if (Palette.dark) flags and lightBars.inv() else flags or lightBars
     }
 
     protected fun setupScreen(title: String, subtitle: String? = null) {
@@ -219,15 +277,18 @@ abstract class RootsActivity : Activity() {
         frame = FrameLayout(this).apply { setBackgroundColor(Palette.BG) }
         val column = vertical()
 
-        val header = vertical().apply { setPadding(dp(22), dp(18), dp(22), dp(6)) }
+        // Cabeçalho: título e subtítulo à esquerda; botões de ação (addHeaderAction) à direita.
+        headerRow = horizontal().apply { setPadding(dp(22), dp(18), dp(14), dp(6)) }
+        val headerText = vertical()
         titleView = text(title, 30f, Palette.TEXT).apply { typeface = font(Weight.BLACK) }
         subtitleView = text(subtitle.orEmpty(), 14f, Palette.MUTED).apply {
             typeface = font(Weight.SEMIBOLD)
             visibility = if (subtitle.isNullOrEmpty()) View.GONE else View.VISIBLE
         }
-        header.addView(titleView)
-        header.addView(subtitleView)
-        column.addView(header)
+        headerText.addView(titleView)
+        headerText.addView(subtitleView)
+        headerRow.addView(headerText, lp(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        column.addView(headerRow)
 
         scroll = ScrollView(this).apply {
             isFillViewport = true
@@ -240,6 +301,19 @@ abstract class RootsActivity : Activity() {
 
         frame.addView(column, FrameLayout.LayoutParams(-1, -1))
         setContentView(frame)
+    }
+
+    /** Botão redondo no canto direito do cabeçalho. [glyph] costuma ser um emoji. */
+    protected fun addHeaderAction(glyph: String, description: String, onClick: () -> Unit) {
+        val button = text(glyph, 22f).apply {
+            gravity = Gravity.CENTER
+            contentDescription = description
+            background = ripple(oval(0x00000000))
+            stateListAnimator = pressScale()
+            isClickable = true
+            setOnClickListener { onClick() }
+        }
+        headerRow.addView(button, lp(dp(44), dp(44)))
     }
 
     protected fun setHeader(title: String, subtitle: String? = null) {

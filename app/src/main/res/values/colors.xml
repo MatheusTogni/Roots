@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cores do widget no modo "Automático": o Android escolhe entre esta e a de values-night conforme o
+         tema do aparelho. Os mesmos tons da Palette (Theme.kt). Quando o usuário força Claro/Escuro no app,
+         o widget usa os layouts *_forced, pintados em código. -->
+    <color name="widget_bg">#FFF6F5F0</color>
+    <color name="widget_row">#FFFFFFFF</color>
+    <color name="widget_text">#FF1F2A24</color>
+    <color name="widget_muted">#FF7B867F</color>
+</resources>

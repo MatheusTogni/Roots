@@ -51,7 +51,7 @@ fun Activity.showHabitDialog(existing: Habit?, onChanged: () -> Unit) {
         iconCells.forEachIndexed { i, cell ->
             val chosen = HabitOptions.ICONS[i] == icon
             cell.background = if (chosen) {
-                rounded(withAlpha(color, 0x2E), dpf(12f), color, dp(2))
+                rounded(withAlpha(color, Palette.TINT_ALPHA), dpf(12f), color, dp(2))
             } else {
                 rounded(0x00000000, dpf(12f))
             }

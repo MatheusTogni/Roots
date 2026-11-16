@@ -35,8 +35,22 @@
             android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
             android:maxLines="1"
-            android:textColor="#FF1F2A24"
+            android:textColor="@color/widget_text"
             android:textSize="14sp" />
+
+        <!-- Mesmo nome com a cor apagada, mostrado no lugar do anterior quando o hábito está concluído.
+             Duas views com cores de recurso acompanham o tema do aparelho sem fixar cor no código. -->
+        <TextView
+            android:id="@+id/row_name_done"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:textColor="@color/widget_muted"
+            android:textSize="14sp"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/row_check"

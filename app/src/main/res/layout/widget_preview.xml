@@ -14,7 +14,7 @@
         android:paddingStart="6dp"
         android:paddingBottom="8dp"
         android:text="@string/widget_title"
-        android:textColor="#FF1F2A24"
+        android:textColor="@color/widget_text"
         android:textSize="15sp"
         android:textStyle="bold" />
 
@@ -32,7 +32,7 @@
             android:layout_weight="1"
             android:fontFamily="sans-serif-medium"
             android:text="🏃  Exercício"
-            android:textColor="#FF1F2A24"
+            android:textColor="@color/widget_text"
             android:textSize="14sp" />
 
         <TextView
@@ -59,7 +59,7 @@
             android:layout_weight="1"
             android:fontFamily="sans-serif-medium"
             android:text="📖  Bíblia"
-            android:textColor="#FF1F2A24"
+            android:textColor="@color/widget_text"
             android:textSize="14sp" />
 
         <TextView

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Com o aparelho no modo escuro, a janela de abertura já nasce escura (sem piscar branco). -->
+    <style name="AppTheme" parent="AppThemeDark" />
+</resources>

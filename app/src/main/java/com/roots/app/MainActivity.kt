@@ -19,7 +19,10 @@ import com.roots.app.ui.HabitCalendarCard
 import com.roots.app.ui.MonthWindow
 import com.roots.app.ui.Palette
 import com.roots.app.ui.RootsActivity
+import com.roots.app.ui.ThemeMode
+import com.roots.app.ui.ThemeSettings
 import com.roots.app.ui.card
+import com.roots.app.ui.dialogBuilder
 import com.roots.app.ui.dp
 import com.roots.app.ui.dpf
 import com.roots.app.ui.emojiBadge
@@ -55,7 +58,29 @@ class MainActivity : RootsActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupScreen("Roots", Fmt.capitalize(Fmt.dayLabel(LocalDate.now())))
+        addHeaderAction("🌓", "Aparência") { showThemeDialog() }
         addFab("+") { showHabitDialog(null) { render() } }
+    }
+
+    // ---------- Aparência (claro / escuro) ----------
+
+    /** Escolha entre acompanhar o aparelho, claro ou escuro; o widget muda junto. */
+    private fun showThemeDialog() {
+        val labels = arrayOf<CharSequence>("Automático (igual ao aparelho)", "Claro", "Escuro")
+        val current = ThemeSettings.mode(this)
+        dialogBuilder()
+            .setTitle("Aparência")
+            .setSingleChoiceItems(labels, current.ordinal) { dialog, which ->
+                dialog.dismiss()
+                val chosen = ThemeMode.values()[which]
+                if (chosen != current) {
+                    ThemeSettings.set(this, chosen)
+                    // Recria a tela para montar tudo de novo já com as cores do tema escolhido.
+                    recreate()
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     override fun onStart() {

@@ -12,6 +12,8 @@ import com.roots.app.MainActivity
 import com.roots.app.R
 import com.roots.app.data.Repository
 import com.roots.app.ui.Fmt
+import com.roots.app.ui.Palette
+import com.roots.app.ui.ThemeSettings
 import java.time.LocalDate
 
 /**
@@ -79,10 +81,27 @@ class HabitWidgetProvider : AppWidgetProvider() {
             val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
             val compact = minHeight in 1..COMPACT_MAX_HEIGHT_DP
 
-            val views = RemoteViews(
-                context.packageName,
-                if (compact) R.layout.widget_habits_compact else R.layout.widget_habits
-            )
+            // Tema escolhido no app. Automático (null): layouts com cores de recurso, que o Android troca
+            // sozinho quando o aparelho muda de tema. Claro/escuro forçado: layouts *_forced, sem cor fixa,
+            // pintados abaixo com a mesma Palette do app (layout diferente = o launcher remonta tudo do zero).
+            val forced = ThemeSettings.forcedDark(context) != null
+            val layout = when {
+                !forced && compact -> R.layout.widget_habits_compact
+                !forced -> R.layout.widget_habits
+                compact -> R.layout.widget_habits_compact_forced
+                else -> R.layout.widget_habits_forced
+            }
+            val views = RemoteViews(context.packageName, layout)
+            if (forced) {
+                Palette.use(context)
+                // O filtro troca a cor da forma branca do fundo (mantendo os cantos arredondados).
+                views.setInt(R.id.widget_bg_img, "setColorFilter", Palette.BG)
+                views.setTextColor(R.id.empty_view, Palette.MUTED)
+                if (!compact) {
+                    views.setTextColor(R.id.widget_title, Palette.TEXT)
+                    views.setTextColor(R.id.widget_date, Palette.MUTED)
+                }
+            }
 
             // Lista de hábitos, fornecida por HabitWidgetService (uma URI única por instância).
             val serviceIntent = Intent(context, HabitWidgetService::class.java)

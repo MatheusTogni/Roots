@@ -100,6 +100,6 @@ fun Context.emojiBadge(icon: String, color: Int, sizeDp: Int = 40): TextView =
         text = icon
         textSize = (sizeDp * 0.5f)
         gravity = Gravity.CENTER
-        background = rounded(withAlpha(color, 0x2E), dpf(12f))
+        background = rounded(withAlpha(color, Palette.TINT_ALPHA), dpf(12f))
         layoutParams = lp(dp(sizeDp), dp(sizeDp))
     }
