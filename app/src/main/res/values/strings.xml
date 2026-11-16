@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Roots</string>
+    <string name="widget_label">Meus hábitos</string>
+    <string name="widget_description">Marque os hábitos do dia direto da tela inicial.</string>
+    <string name="widget_title">Meus hábitos</string>
+    <string name="widget_empty">Nenhum hábito cadastrado</string>
+</resources>
