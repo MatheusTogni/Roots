@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Previa do widget "Meus gráficos" no seletor de widgets (desenho estático, não usa dados do app). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="324dp"
+    android:viewportWidth="320"
+    android:viewportHeight="324">
+    <path
+        android:fillColor="#FFF6F5F0"
+        android:pathData="M22,0 H298 Q320,0 320,22 V302 Q320,324 298,324 H22 Q0,324 0,302 V22 Q0,0 22,0 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M26,12 H294 Q308,12 308,26 V144 Q308,158 294,158 H26 Q12,158 12,144 V26 Q12,12 26,12 Z" />
+    <path
+        android:fillColor="#FF30A14E" android:fillAlpha="0.25"
+        android:pathData="M29,24 H37 Q42,24 42,29 V37 Q42,42 37,42 H29 Q24,42 24,37 V29 Q24,24 29,24 Z" />
+    <path
+        android:fillColor="#FFCFD6D1"
+        android:pathData="M54,29 H142 Q146,29 146,33 V33 Q146,37 142,37 H54 Q50,37 50,33 V33 Q50,29 54,29 Z" />
+    <path
+        android:fillColor="#FFCFD6D1"
+        android:pathData="M258,29 H292 Q296,29 296,33 V33 Q296,37 292,37 H258 Q254,37 254,33 V33 Q254,29 258,29 Z" />
+    <path
+        android:fillColor="#FFE7E5DE"
+        android:pathData="M52.0,65.5 h13 v13 h-13 z M52.0,112.0 h13 v13 h-13 z M67.5,65.5 h13 v13 h-13 z M67.5,81.0 h13 v13 h-13 z M67.5,127.5 h13 v13 h-13 z M83.0,81.0 h13 v13 h-13 z M83.0,127.5 h13 v13 h-13 z M83.0,143.0 h13 v13 h-13 z M98.5,50.0 h13 v13 h-13 z M98.5,96.5 h13 v13 h-13 z M98.5,143.0 h13 v13 h-13 z M114.0,50.0 h13 v13 h-13 z M114.0,96.5 h13 v13 h-13 z M114.0,112.0 h13 v13 h-13 z M129.5,65.5 h13 v13 h-13 z M129.5,112.0 h13 v13 h-13 z M145.0,65.5 h13 v13 h-13 z M145.0,81.0 h13 v13 h-13 z M145.0,127.5 h13 v13 h-13 z M160.5,81.0 h13 v13 h-13 z M160.5,127.5 h13 v13 h-13 z M160.5,143.0 h13 v13 h-13 z M176.0,50.0 h13 v13 h-13 z M176.0,96.5 h13 v13 h-13 z M176.0,143.0 h13 v13 h-13 z M191.5,50.0 h13 v13 h-13 z M191.5,96.5 h13 v13 h-13 z M191.5,112.0 h13 v13 h-13 z M207.0,65.5 h13 v13 h-13 z M207.0,112.0 h13 v13 h-13 z M222.5,65.5 h13 v13 h-13 z M222.5,81.0 h13 v13 h-13 z M222.5,127.5 h13 v13 h-13 z M238.0,81.0 h13 v13 h-13 z M238.0,127.5 h13 v13 h-13 z M238.0,143.0 h13 v13 h-13 z M253.5,50.0 h13 v13 h-13 z" />
+    <path
+        android:fillColor="#FF30A14E"
+        android:pathData="M52.0,50.0 h13 v13 h-13 z M52.0,81.0 h13 v13 h-13 z M52.0,96.5 h13 v13 h-13 z M52.0,127.5 h13 v13 h-13 z M52.0,143.0 h13 v13 h-13 z M67.5,50.0 h13 v13 h-13 z M67.5,96.5 h13 v13 h-13 z M67.5,112.0 h13 v13 h-13 z M67.5,143.0 h13 v13 h-13 z M83.0,50.0 h13 v13 h-13 z M83.0,65.5 h13 v13 h-13 z M83.0,96.5 h13 v13 h-13 z M83.0,112.0 h13 v13 h-13 z M98.5,65.5 h13 v13 h-13 z M98.5,81.0 h13 v13 h-13 z M98.5,112.0 h13 v13 h-13 z M98.5,127.5 h13 v13 h-13 z M114.0,65.5 h13 v13 h-13 z M114.0,81.0 h13 v13 h-13 z M114.0,127.5 h13 v13 h-13 z M114.0,143.0 h13 v13 h-13 z M129.5,50.0 h13 v13 h-13 z M129.5,81.0 h13 v13 h-13 z M129.5,96.5 h13 v13 h-13 z M129.5,127.5 h13 v13 h-13 z M129.5,143.0 h13 v13 h-13 z M145.0,50.0 h13 v13 h-13 z M145.0,96.5 h13 v13 h-13 z M145.0,112.0 h13 v13 h-13 z M145.0,143.0 h13 v13 h-13 z M160.5,50.0 h13 v13 h-13 z M160.5,65.5 h13 v13 h-13 z M160.5,96.5 h13 v13 h-13 z M160.5,112.0 h13 v13 h-13 z M176.0,65.5 h13 v13 h-13 z M176.0,81.0 h13 v13 h-13 z M176.0,112.0 h13 v13 h-13 z M176.0,127.5 h13 v13 h-13 z M191.5,65.5 h13 v13 h-13 z M191.5,81.0 h13 v13 h-13 z M191.5,127.5 h13 v13 h-13 z M191.5,143.0 h13 v13 h-13 z M207.0,50.0 h13 v13 h-13 z M207.0,81.0 h13 v13 h-13 z M207.0,96.5 h13 v13 h-13 z M207.0,127.5 h13 v13 h-13 z M207.0,143.0 h13 v13 h-13 z M222.5,50.0 h13 v13 h-13 z M222.5,96.5 h13 v13 h-13 z M222.5,112.0 h13 v13 h-13 z M222.5,143.0 h13 v13 h-13 z M238.0,50.0 h13 v13 h-13 z M238.0,65.5 h13 v13 h-13 z M238.0,96.5 h13 v13 h-13 z M238.0,112.0 h13 v13 h-13 z M253.5,65.5 h13 v13 h-13 z M253.5,81.0 h13 v13 h-13 z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M26,166 H294 Q308,166 308,180 V298 Q308,312 294,312 H26 Q12,312 12,298 V180 Q12,166 26,166 Z" />
+    <path
+        android:fillColor="#FFE3B341" android:fillAlpha="0.25"
+        android:pathData="M29,178 H37 Q42,178 42,183 V191 Q42,196 37,196 H29 Q24,196 24,191 V183 Q24,178 29,178 Z" />
+    <path
+        android:fillColor="#FFCFD6D1"
+        android:pathData="M54,183 H142 Q146,183 146,187 V187 Q146,191 142,191 H54 Q50,191 50,187 V187 Q50,183 54,183 Z" />
+    <path
+        android:fillColor="#FFCFD6D1"
+        android:pathData="M258,183 H292 Q296,183 296,187 V187 Q296,191 292,191 H258 Q254,191 254,187 V187 Q254,183 258,183 Z" />
+    <path
+        android:fillColor="#FFE7E5DE"
+        android:pathData="M52.0,235.0 h13 v13 h-13 z M52.0,250.5 h13 v13 h-13 z M52.0,281.5 h13 v13 h-13 z M52.0,297.0 h13 v13 h-13 z M67.5,204.0 h13 v13 h-13 z M67.5,219.5 h13 v13 h-13 z M67.5,266.0 h13 v13 h-13 z M67.5,281.5 h13 v13 h-13 z M83.0,204.0 h13 v13 h-13 z M83.0,235.0 h13 v13 h-13 z M83.0,250.5 h13 v13 h-13 z M83.0,297.0 h13 v13 h-13 z M98.5,219.5 h13 v13 h-13 z M98.5,235.0 h13 v13 h-13 z M98.5,266.0 h13 v13 h-13 z M98.5,281.5 h13 v13 h-13 z M114.0,204.0 h13 v13 h-13 z M114.0,219.5 h13 v13 h-13 z M114.0,250.5 h13 v13 h-13 z M114.0,266.0 h13 v13 h-13 z M114.0,297.0 h13 v13 h-13 z M129.5,235.0 h13 v13 h-13 z M129.5,250.5 h13 v13 h-13 z M129.5,281.5 h13 v13 h-13 z M129.5,297.0 h13 v13 h-13 z M145.0,204.0 h13 v13 h-13 z M145.0,219.5 h13 v13 h-13 z M145.0,266.0 h13 v13 h-13 z M145.0,281.5 h13 v13 h-13 z M160.5,204.0 h13 v13 h-13 z M160.5,235.0 h13 v13 h-13 z M160.5,250.5 h13 v13 h-13 z M160.5,297.0 h13 v13 h-13 z M176.0,219.5 h13 v13 h-13 z M176.0,235.0 h13 v13 h-13 z M176.0,266.0 h13 v13 h-13 z M176.0,281.5 h13 v13 h-13 z M191.5,204.0 h13 v13 h-13 z M191.5,219.5 h13 v13 h-13 z M191.5,250.5 h13 v13 h-13 z M191.5,266.0 h13 v13 h-13 z M191.5,297.0 h13 v13 h-13 z M207.0,235.0 h13 v13 h-13 z M207.0,250.5 h13 v13 h-13 z M207.0,281.5 h13 v13 h-13 z M207.0,297.0 h13 v13 h-13 z M222.5,204.0 h13 v13 h-13 z M222.5,219.5 h13 v13 h-13 z M222.5,266.0 h13 v13 h-13 z M222.5,281.5 h13 v13 h-13 z M238.0,204.0 h13 v13 h-13 z M238.0,235.0 h13 v13 h-13 z M238.0,250.5 h13 v13 h-13 z M238.0,297.0 h13 v13 h-13 z M253.5,219.5 h13 v13 h-13 z M253.5,235.0 h13 v13 h-13 z" />
+    <path
+        android:fillColor="#FFE3B341"
+        android:pathData="M52.0,204.0 h13 v13 h-13 z M52.0,219.5 h13 v13 h-13 z M52.0,266.0 h13 v13 h-13 z M67.5,235.0 h13 v13 h-13 z M67.5,250.5 h13 v13 h-13 z M67.5,297.0 h13 v13 h-13 z M83.0,219.5 h13 v13 h-13 z M83.0,266.0 h13 v13 h-13 z M83.0,281.5 h13 v13 h-13 z M98.5,204.0 h13 v13 h-13 z M98.5,250.5 h13 v13 h-13 z M98.5,297.0 h13 v13 h-13 z M114.0,235.0 h13 v13 h-13 z M114.0,281.5 h13 v13 h-13 z M129.5,204.0 h13 v13 h-13 z M129.5,219.5 h13 v13 h-13 z M129.5,266.0 h13 v13 h-13 z M145.0,235.0 h13 v13 h-13 z M145.0,250.5 h13 v13 h-13 z M145.0,297.0 h13 v13 h-13 z M160.5,219.5 h13 v13 h-13 z M160.5,266.0 h13 v13 h-13 z M160.5,281.5 h13 v13 h-13 z M176.0,204.0 h13 v13 h-13 z M176.0,250.5 h13 v13 h-13 z M176.0,297.0 h13 v13 h-13 z M191.5,235.0 h13 v13 h-13 z M191.5,281.5 h13 v13 h-13 z M207.0,204.0 h13 v13 h-13 z M207.0,219.5 h13 v13 h-13 z M207.0,266.0 h13 v13 h-13 z M222.5,235.0 h13 v13 h-13 z M222.5,250.5 h13 v13 h-13 z M222.5,297.0 h13 v13 h-13 z M238.0,219.5 h13 v13 h-13 z M238.0,266.0 h13 v13 h-13 z M238.0,281.5 h13 v13 h-13 z M253.5,204.0 h13 v13 h-13 z" />
+</vector>

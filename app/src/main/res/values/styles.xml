@@ -48,6 +48,30 @@
         <item name="android:windowTitleStyle">@style/AppDialogTitleDark</item>
     </style>
 
+    <!-- Formulários em "folha" que sobe da base da tela (ex.: novo/editar hábito). A folha, com cantos e cores,
+         é desenhada em código; o tema só deixa a janela transparente e sem animação própria. -->
+    <style name="AppSheetLight" parent="@android:style/Theme.Material.Light.Dialog.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimAmount">0.5</item>
+        <item name="android:fontFamily">@font/nunito</item>
+        <item name="android:colorAccent">#2F7D4F</item>
+        <item name="android:colorControlActivated">#2F7D4F</item>
+        <item name="android:textColorPrimary">#1F2A24</item>
+        <item name="android:textColorSecondary">#7B867F</item>
+    </style>
+
+    <style name="AppSheetDark" parent="@android:style/Theme.Material.Dialog.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+        <item name="android:fontFamily">@font/nunito</item>
+        <item name="android:colorAccent">#5FBF86</item>
+        <item name="android:colorControlActivated">#5FBF86</item>
+        <item name="android:textColorPrimary">#E6EDE8</item>
+        <item name="android:textColorSecondary">#8C988F</item>
+    </style>
+
     <style name="AppDialogTitleLight">
         <item name="android:textAppearance">@android:style/TextAppearance.Material.DialogWindowTitle</item>
         <item name="android:fontFamily">@font/nunito_black</item>

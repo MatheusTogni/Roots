@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.RippleDrawable
@@ -55,6 +56,9 @@ object Palette {
 
     val BG: Int get() = pick(0xFFF6F5F0, 0xFF0F1411)
     val SURFACE: Int get() = pick(0xFFFFFFFF, 0xFF18201B)
+
+    /** Fundo da folha do formulário (sobe da base da tela): um pouco mais clara que os cards no escuro. */
+    val SHEET: Int get() = pick(0xFFFFFFFF, 0xFF1E2721)
     val BORDER: Int get() = pick(0xFFECEAE3, 0xFF28322C)
     val EMPTY_CELL: Int get() = pick(0xFFE7E5DE, 0xFF2E3A33)
     val TEXT: Int get() = pick(0xFF1F2A24, 0xFFE6EDE8)
@@ -257,12 +261,18 @@ abstract class RootsActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // O tema (claro/escuro) precisa estar definido antes de qualquer view ser criada.
         Palette.use(this)
-        setTheme(if (Palette.dark) R.style.AppThemeDark else R.style.AppThemeLight)
+        applyThemeStyle()
         super.onCreate(savedInstanceState)
     }
 
+    /** Aplica à Activity o estilo claro ou escuro conforme a Palette (vale para as views criadas depois). */
+    protected fun applyThemeStyle() {
+        setTheme(if (Palette.dark) R.style.AppThemeDark else R.style.AppThemeLight)
+    }
+
+    /** Cor e ícones das barras de status e de navegação, de acordo com o tema ativo. */
     @Suppress("DEPRECATION")
-    private fun styleSystemBars() {
+    protected fun styleSystemBars() {
         window.statusBarColor = Palette.BG
         window.navigationBarColor = Palette.BG
         // Ícones escuros nas barras só no tema claro; no escuro ficam claros.
@@ -271,8 +281,13 @@ abstract class RootsActivity : Activity() {
         window.decorView.systemUiVisibility = if (Palette.dark) flags and lightBars.inv() else flags or lightBars
     }
 
-    protected fun setupScreen(title: String, subtitle: String? = null) {
-        styleSystemBars()
+    /**
+     * Monta a tela. Pode ser chamada de novo (troca de tema no lugar): substitui o conteúdo por uma tela nova.
+     * [styleBars] = false deixa as barras do sistema como estão, para a transição de tema trocá-las no meio.
+     */
+    protected fun setupScreen(title: String, subtitle: String? = null, styleBars: Boolean = true) {
+        if (styleBars) styleSystemBars()
+        window.setBackgroundDrawable(ColorDrawable(Palette.BG))
 
         frame = FrameLayout(this).apply { setBackgroundColor(Palette.BG) }
         val column = vertical()
@@ -303,8 +318,8 @@ abstract class RootsActivity : Activity() {
         setContentView(frame)
     }
 
-    /** Botão redondo no canto direito do cabeçalho. [glyph] costuma ser um emoji. */
-    protected fun addHeaderAction(glyph: String, description: String, onClick: () -> Unit) {
+    /** Botão redondo no canto direito do cabeçalho. [glyph] costuma ser um emoji. Devolve o botão criado. */
+    protected fun addHeaderAction(glyph: String, description: String, onClick: () -> Unit): TextView {
         val button = text(glyph, 22f).apply {
             gravity = Gravity.CENTER
             contentDescription = description
@@ -314,6 +329,7 @@ abstract class RootsActivity : Activity() {
             setOnClickListener { onClick() }
         }
         headerRow.addView(button, lp(dp(44), dp(44)))
+        return button
     }
 
     protected fun setHeader(title: String, subtitle: String? = null) {
@@ -338,13 +354,22 @@ abstract class RootsActivity : Activity() {
         })
     }
 
-    /** Estado vazio simples. */
-    protected fun emptyState(emoji: String, title: String, message: String) {
+    /** Estado vazio simples, com um botão de ação opcional ([actionLabel] + [onAction]). */
+    protected fun emptyState(
+        emoji: String,
+        title: String,
+        message: String,
+        actionLabel: String? = null,
+        onAction: () -> Unit = {}
+    ) {
         content.addView(vertical(dp(24)).apply {
             gravity = Gravity.CENTER_HORIZONTAL
             addView(text(emoji, 52f).apply { gravity = Gravity.CENTER })
             addView(text(title, 18f, Palette.TEXT, bold = true).apply { gravity = Gravity.CENTER }, lp().margins(t = dp(8)))
             addView(text(message, 14f, Palette.MUTED).apply { gravity = Gravity.CENTER }, lp().margins(t = dp(6)))
+            if (actionLabel != null) {
+                addView(button(actionLabel, BtnStyle.PRIMARY) { onAction() }, lp(ViewGroup.LayoutParams.WRAP_CONTENT).margins(t = dp(22)))
+            }
         }, lp().margins(t = dp(40)))
     }
 

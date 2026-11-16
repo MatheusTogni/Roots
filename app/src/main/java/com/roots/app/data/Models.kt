@@ -10,7 +10,7 @@ data class Habit(
     val sortOrder: Int = 0
 )
 
-/** Opções oferecidas ao criar/editar um hábito e os hábitos iniciais do primeiro uso. */
+/** Opções de cor e ícone oferecidas ao criar ou editar um hábito. */
 object HabitOptions {
     val COLORS: IntArray = intArrayOf(
         0xFF30A14E.toInt(), // verde
@@ -30,13 +30,6 @@ object HabitOptions {
         "🏃", "💪", "🚴", "🏊", "🚶", "📖", "🙏", "📚",
         "✏️", "💻", "🎸", "🎨", "💧", "🥗", "😴", "💊",
         "🌱", "☀️", "🎯", "🍎", "🎧", "🛌", "🚭", "⏰"
-    )
-
-    /** Hábitos criados na primeira vez que o banco é aberto (editáveis e excluíveis). */
-    val SEED: List<Habit> = listOf(
-        Habit(name = "Exercício", icon = "🏃", color = COLORS[0]),
-        Habit(name = "Bíblia", icon = "📖", color = COLORS[1]),
-        Habit(name = "Estudo", icon = "📚", color = COLORS[2])
     )
 
     const val NAME_MAX_LENGTH = 30

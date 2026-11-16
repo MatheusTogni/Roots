@@ -9,8 +9,11 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.animation.OvershootInterpolator
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import com.roots.app.data.Habit
 import com.roots.app.data.Repository
 import com.roots.app.ui.CheckCircle
@@ -21,8 +24,8 @@ import com.roots.app.ui.Palette
 import com.roots.app.ui.RootsActivity
 import com.roots.app.ui.ThemeMode
 import com.roots.app.ui.ThemeSettings
+import com.roots.app.ui.ThemeTransition
 import com.roots.app.ui.card
-import com.roots.app.ui.dialogBuilder
 import com.roots.app.ui.dp
 import com.roots.app.ui.dpf
 import com.roots.app.ui.emojiBadge
@@ -48,6 +51,9 @@ class MainActivity : RootsActivity() {
     private var today: LocalDate = LocalDate.now()
     private val cards = HashMap<Long, HabitCalendarCard>()
 
+    private lateinit var themeButton: TextView
+    private var switchingTheme = false
+
     /** Vira o dia com o app aberto: data, hora ou fuso mudaram. */
     private val dayReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -57,30 +63,104 @@ class MainActivity : RootsActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setupScreen("Roots", Fmt.capitalize(Fmt.dayLabel(LocalDate.now())))
-        addHeaderAction("🌓", "Aparência") { showThemeDialog() }
+        buildScreen(styleBars = true)
+    }
+
+    /** Monta cabeçalho (com o botão de tema) e botão "+". O conteúdo é desenhado por [render]. */
+    private fun buildScreen(styleBars: Boolean) {
+        setupScreen("Roots", Fmt.capitalize(Fmt.dayLabel(LocalDate.now())), styleBars)
+        themeButton = addHeaderAction(themeGlyph(), themeDescription()) { toggleTheme() }
+        // Segurar o botão volta a acompanhar o tema do aparelho.
+        themeButton.setOnLongClickListener {
+            useAutomaticTheme()
+            true
+        }
         addFab("+") { showHabitDialog(null) { render() } }
     }
 
-    // ---------- Aparência (claro / escuro) ----------
+    // ---------- Tema claro / escuro ----------
 
-    /** Escolha entre acompanhar o aparelho, claro ou escuro; o widget muda junto. */
-    private fun showThemeDialog() {
-        val labels = arrayOf<CharSequence>("Automático (igual ao aparelho)", "Claro", "Escuro")
-        val current = ThemeSettings.mode(this)
-        dialogBuilder()
-            .setTitle("Aparência")
-            .setSingleChoiceItems(labels, current.ordinal) { dialog, which ->
-                dialog.dismiss()
-                val chosen = ThemeMode.values()[which]
-                if (chosen != current) {
-                    ThemeSettings.set(this, chosen)
-                    // Recria a tela para montar tudo de novo já com as cores do tema escolhido.
-                    recreate()
-                }
+    /** Mostra o que o toque vai fazer: lua no tema claro (vai para o escuro), sol no escuro (vai para o claro). */
+    private fun themeGlyph(): String = if (Palette.dark) "☀️" else "🌙"
+
+    private fun themeDescription(): String =
+        if (Palette.dark) "Mudar para o tema claro" else "Mudar para o tema escuro"
+
+    private fun toggleTheme() {
+        switchTheme(if (Palette.dark) ThemeMode.LIGHT else ThemeMode.DARK)
+    }
+
+    private fun useAutomaticTheme() {
+        switchTheme(ThemeMode.AUTO)
+        Toast.makeText(this, "Tema automático: igual ao do aparelho", Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * Troca o tema com uma transição: tira uma foto da tela, monta a tela nova já no tema escolhido (sem
+     * recriar a Activity, para não piscar) e revela o tema novo num círculo que cresce a partir do botão.
+     * O widget acompanha: [ThemeSettings.set] pede o redesenho dele.
+     */
+    private fun switchTheme(mode: ThemeMode) {
+        if (switchingTheme) return
+        val wasDark = Palette.dark
+
+        // 1) Foto da tela atual e ponto de partida do efeito (centro do botão).
+        val snapshot = ThemeTransition.capture(window.decorView)
+        val at = IntArray(2)
+        themeButton.getLocationInWindow(at)
+        val originX = at[0] + themeButton.width / 2f
+        val originY = at[1] + themeButton.height / 2f
+        val scrollY = scroll.scrollY
+
+        // 2) Grava a escolha (e avisa os widgets) e resolve o tema que passa a valer.
+        ThemeSettings.set(this, mode)
+        Palette.use(this)
+        if (Palette.dark == wasDark) {
+            // Ex.: voltar ao automático quando o aparelho já está no mesmo tema: nada muda na tela.
+            snapshot?.recycle()
+            return
+        }
+
+        // 3) Monta a tela de novo, por baixo da foto, já com as cores novas.
+        applyThemeStyle()
+        buildScreen(styleBars = snapshot == null)
+        render()
+        // A tela nova nasce no topo; volta para onde o usuário estava rolando.
+        scroll.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                scroll.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                scroll.scrollTo(0, scrollY)
             }
-            .setNegativeButton("Cancelar", null)
-            .show()
+        })
+        if (snapshot == null) return
+
+        // 4) O ícone novo gira e aparece enquanto o círculo abre em cima dele.
+        themeButton.alpha = 0f
+        themeButton.scaleX = 0.5f
+        themeButton.scaleY = 0.5f
+        themeButton.rotation = -140f
+        themeButton.animate()
+            .alpha(1f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .rotation(0f)
+            .setStartDelay(120)
+            .setDuration(560)
+            .setInterpolator(OvershootInterpolator(1.3f))
+            .start()
+
+        // 5) Revela. As barras do sistema trocam quando o círculo já passou por elas.
+        switchingTheme = true
+        var barsDone = false
+        ThemeTransition.reveal(this, snapshot, originX, originY, onProgress = { progress ->
+            if (!barsDone && progress > 0.2f) {
+                barsDone = true
+                styleSystemBars()
+            }
+        }, onEnd = {
+            styleSystemBars()
+            switchingTheme = false
+        })
     }
 
     override fun onStart() {
@@ -118,7 +198,12 @@ class MainActivity : RootsActivity() {
 
         val habits = repo.habits()
         if (habits.isEmpty()) {
-            emptyState("🌱", "Nenhum hábito por aqui", "Toque no + para criar o primeiro.")
+            emptyState(
+                "🌱",
+                "Nenhum hábito por aqui",
+                "Crie o primeiro e acompanhe a sua constância, um dia de cada vez.",
+                "Criar meu primeiro hábito"
+            ) { showHabitDialog(null) { render() } }
             return
         }
 

@@ -1,6 +1,5 @@
 package com.roots.app.data
 
-import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
@@ -40,27 +39,12 @@ class Db(context: Context) : SQLiteOpenHelper(context, "roots.db", null, VERSION
             """
         )
         db.execSQL("CREATE INDEX idx_records_date ON habit_records(date)")
-        seed(db)
+        // O app começa sem nenhum hábito: quem instala cria os seus.
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // Migrações futuras: um bloco por versão, em ordem, sem apagar dados. Exemplo:
         // if (oldVersion < 2) { db.execSQL("ALTER TABLE habits ADD COLUMN ...") }
-    }
-
-    private fun seed(db: SQLiteDatabase) {
-        val now = System.currentTimeMillis()
-        HabitOptions.SEED.forEachIndexed { index, h ->
-            val v = ContentValues().apply {
-                put("name", h.name)
-                put("icon", h.icon)
-                put("color", h.color)
-                put("created_at", now)
-                put("sort_order", index)
-                put("is_active", 1)
-            }
-            db.insertOrThrow("habits", null, v)
-        }
     }
 
     companion object {

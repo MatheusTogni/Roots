@@ -27,7 +27,8 @@ class HabitWidgetProvider : AppWidgetProvider() {
     }
 
     override fun onDisabled(context: Context) {
-        WidgetUpdater.cancelMidnight(context)
+        // Cancela o alarme da meia-noite só se não sobrou nenhum widget de nenhum tipo.
+        WidgetUpdater.scheduleMidnight(context)
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {

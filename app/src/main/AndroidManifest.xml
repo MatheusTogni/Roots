@@ -39,6 +39,25 @@
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
 
+        <!-- Widget "Meus gráficos": um calendário por hábito (várias instâncias, redimensionável). -->
+        <receiver
+            android:name=".widget.GraphWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_graphs_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/habit_graph_widget_info" />
+        </receiver>
+
+        <!-- Fornece os cards da lista do widget "Meus gráficos" (RemoteViewsFactory). -->
+        <service
+            android:name=".widget.HabitGraphService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
         <!-- Mudança de data/hora/fuso, boot, atualização do app e alarme de meia-noite. -->
         <receiver
             android:name=".widget.DayChangeReceiver"

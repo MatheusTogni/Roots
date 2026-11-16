@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.RectF
 import android.view.Gravity
 import android.view.View
 import android.view.animation.DecelerateInterpolator
@@ -91,6 +92,52 @@ class CheckCircle(context: Context, private var tint: Int) : View(context) {
     override fun onDetachedFromWindow() {
         animator?.cancel()
         super.onDetachedFromWindow()
+    }
+}
+
+/**
+ * Faixa de quadradinhos que imita o calendário do hábito, para o formulário mostrar ao vivo
+ * como a cor escolhida vai ficar. O desenho é só ilustrativo (um padrão fixo de dias feitos).
+ */
+class HabitPreviewStrip(context: Context, private var tint: Int) : View(context) {
+
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val rect = RectF()
+    private val gap = context.dpf(3f)
+
+    fun recolor(newTint: Int) {
+        tint = newTint
+        invalidate()
+    }
+
+    private fun cellSize(width: Int): Float = (width - gap * (COLUMNS - 1)) / COLUMNS
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val width = MeasureSpec.getSize(widthMeasureSpec)
+        val height = ROWS * cellSize(width) + (ROWS - 1) * gap
+        setMeasuredDimension(width, height.toInt() + 1)
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        val cell = cellSize(width)
+        val radius = cell * 0.22f
+        for (col in 0 until COLUMNS) {
+            for (row in 0 until ROWS) {
+                val index = col * ROWS + row
+                val left = col * (cell + gap)
+                val top = row * (cell + gap)
+                rect.set(left, top, left + cell, top + cell)
+                // Padrão fixo, espalhado, só para parecer um calendário de verdade.
+                paint.color = if ((index * 37 + 11) % 10 < 6) tint else Palette.EMPTY_CELL
+                canvas.drawRoundRect(rect, radius, radius, paint)
+            }
+        }
+    }
+
+    private companion object {
+        const val COLUMNS = 22
+        const val ROWS = 3
     }
 }
 

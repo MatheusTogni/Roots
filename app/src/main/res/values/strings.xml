@@ -5,4 +5,7 @@
     <string name="widget_description">Marque os hábitos do dia direto da tela inicial.</string>
     <string name="widget_title">Meus hábitos</string>
     <string name="widget_empty">Nenhum hábito cadastrado</string>
+    <string name="widget_graphs_label">Meus gráficos</string>
+    <string name="widget_graphs_description">Veja o calendário de cada hábito, dos últimos 3 meses, direto da tela inicial.</string>
+    <string name="widget_graphs_title">Meus gráficos</string>
 </resources>
