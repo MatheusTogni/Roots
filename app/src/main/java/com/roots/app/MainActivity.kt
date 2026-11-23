@@ -4,8 +4,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.text.TextUtils
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +19,8 @@ import android.widget.TextView
 import android.widget.Toast
 import com.roots.app.data.Habit
 import com.roots.app.data.Repository
+import com.roots.app.ui.BtnStyle
+import com.roots.app.ui.CARD_RADIUS
 import com.roots.app.ui.CheckCircle
 import com.roots.app.ui.Fmt
 import com.roots.app.ui.HabitCalendarCard
@@ -25,7 +30,9 @@ import com.roots.app.ui.RootsActivity
 import com.roots.app.ui.ThemeMode
 import com.roots.app.ui.ThemeSettings
 import com.roots.app.ui.ThemeTransition
+import com.roots.app.ui.button
 import com.roots.app.ui.card
+import com.roots.app.ui.confirm
 import com.roots.app.ui.dp
 import com.roots.app.ui.dpf
 import com.roots.app.ui.emojiBadge
@@ -36,6 +43,8 @@ import com.roots.app.ui.pressScale
 import com.roots.app.ui.ripple
 import com.roots.app.ui.rounded
 import com.roots.app.ui.text
+import com.roots.app.ui.vertical
+import com.roots.app.update.Updater
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -54,6 +63,10 @@ class MainActivity : RootsActivity() {
     private lateinit var themeButton: TextView
     private var switchingTheme = false
 
+    private var updateCardView: View? = null
+    private var updateDismissed = false
+    private var installAfterPermission = false
+
     /** Vira o dia com o app aberto: data, hora ou fuso mudaram. */
     private val dayReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -64,6 +77,7 @@ class MainActivity : RootsActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         buildScreen(styleBars = true)
+        Updater.check()
     }
 
     /** Monta cabeçalho (com o botão de tema) e botão "+". O conteúdo é desenhado por [render]. */
@@ -175,15 +189,23 @@ class MainActivity : RootsActivity() {
         } else {
             registerReceiver(dayReceiver, filter)
         }
+        Updater.listener = { refreshUpdateCard() }
+        Updater.onConfirm = { startActivity(it) }
     }
 
     override fun onStop() {
         unregisterReceiver(dayReceiver)
+        Updater.listener = null
+        Updater.onConfirm = null
         super.onStop()
     }
 
     override fun onResume() {
         super.onResume()
+        if (installAfterPermission && packageManager.canRequestPackageInstalls()) {
+            installAfterPermission = false
+            Updater.download(this)
+        }
         // O widget pode ter alterado registros, ou o dia pode ter virado, enquanto o app estava em segundo plano.
         render()
     }
@@ -195,6 +217,7 @@ class MainActivity : RootsActivity() {
 
         content.removeAllViews()
         cards.clear()
+        updateCardView = updateCard()?.also { content.addView(it) }
 
         val habits = repo.habits()
         if (habits.isEmpty()) {
@@ -228,6 +251,90 @@ class MainActivity : RootsActivity() {
             cards[habit.id] = card
             content.addView(card.view)
         }
+    }
+
+    // ---------- Atualização do app ----------
+
+    /** Card no topo quando há versão nova no GitHub. Nada é baixado até o usuário tocar em "Atualizar". */
+    private fun updateCard(): View? {
+        val release = Updater.available ?: return null
+        if (updateDismissed) return null
+
+        val box = card()
+        box.background = rounded(Palette.ACCENT_SOFT, dpf(CARD_RADIUS), Palette.ACCENT, dp(1))
+        box.layoutParams = lp().margins(t = dp(4), b = dp(6))
+
+        val head = horizontal()
+        head.addView(emojiBadge("✨", Palette.ACCENT, 40))
+        val texts = vertical()
+        texts.addView(text("Nova versão disponível", 16f, Palette.TEXT, bold = true))
+        texts.addView(text("Atualizar para a versão ${release.versionName}?", 14f, Palette.MUTED))
+        head.addView(texts, lp(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).margins(l = dp(12)))
+        box.addView(head)
+
+        if (release.notes.isNotEmpty()) {
+            val notes = text(release.notes, 13f, Palette.MUTED)
+            notes.maxLines = 2
+            notes.ellipsize = TextUtils.TruncateAt.END
+            box.addView(notes, lp().margins(t = dp(10)))
+        }
+
+        val error = Updater.error
+        if (Updater.phase == Updater.Phase.FAILED && error != null) {
+            box.addView(text(error, 13f, Palette.DANGER, bold = true), lp().margins(t = dp(10)))
+        }
+
+        val actions = horizontal()
+        actions.gravity = Gravity.END or Gravity.CENTER_VERTICAL
+        val wrap = ViewGroup.LayoutParams.WRAP_CONTENT
+        when (Updater.phase) {
+            Updater.Phase.DOWNLOADING ->
+                actions.addView(text("Baixando… ${Updater.progress}%", 14f, Palette.ACCENT_TEXT, bold = true), lp(wrap).margins(r = dp(6)))
+            Updater.Phase.INSTALLING -> {
+                actions.addView(text("Aguardando o instalador…", 14f, Palette.ACCENT_TEXT, bold = true), lp(0, wrap, 1f))
+                actions.addView(button("Tentar de novo", BtnStyle.GHOST) { startUpdate() }, lp(wrap))
+            }
+            else -> {
+                actions.addView(button("Agora não", BtnStyle.GHOST) {
+                    updateDismissed = true
+                    refreshUpdateCard()
+                }, lp(wrap))
+                val label = if (Updater.phase == Updater.Phase.FAILED) "Tentar de novo" else "Atualizar"
+                actions.addView(button(label, BtnStyle.PRIMARY) { startUpdate() }, lp(wrap).margins(l = dp(8)))
+            }
+        }
+        box.addView(actions, lp().margins(t = dp(12)))
+        return box
+    }
+
+    /** Troca só o card de atualização, sem redesenhar a tela toda (progresso do download etc.). */
+    private fun refreshUpdateCard() {
+        val fresh = updateCard()
+        val old = updateCardView
+        if (old != null && old.parent === content) {
+            val index = content.indexOfChild(old)
+            content.removeViewAt(index)
+            if (fresh != null) content.addView(fresh, index)
+        } else if (fresh != null) {
+            content.addView(fresh, 0)
+        }
+        updateCardView = fresh
+    }
+
+    private fun startUpdate() {
+        if (!packageManager.canRequestPackageInstalls()) {
+            confirm(
+                "Permitir atualizações",
+                "Para instalar a versão nova, o Android precisa que o Roots tenha permissão para instalar apps. " +
+                    "Na próxima tela, ative \"Permitir desta fonte\" e volte para o Roots.",
+                "Abrir ajustes"
+            ) {
+                installAfterPermission = true
+                startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName")))
+            }
+            return
+        }
+        Updater.download(this)
     }
 
     // ---------- Navegação de meses ----------

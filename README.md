@@ -36,7 +36,8 @@ App Android para acompanhar hábitos pela consistência, não pela cobrança. Ca
 - **Banco como fonte de verdade** — app e widget usam o mesmo `Repository`; toda gravação avisa os widgets, então os dois nunca divergem.
 - **Widgets com `AppWidgetProvider` + `RemoteViewsService`** (listas roláveis), checkbox desenhado em `Canvas` e clique com `PendingIntent` explícito. No "Meus gráficos", o calendário de cada hábito é desenhado num bitmap ([`GraphDraw.kt`](app/src/main/java/com/roots/app/widget/GraphDraw.kt)) a partir da mesma `MonthWindow` do app, com cores neutras que servem aos temas claro e escuro.
 - **Virada do dia sem timer em segundo plano** — a data é sempre consultada na hora; um alarme inexato de meia-noite (`AlarmManager`) e os broadcasts de mudança de data/hora/fuso, boot e atualização do app redesenham os widgets. Se o widget estiver mostrando um dia velho, o toque só atualiza em vez de gravar no dia errado.
-- **CI/CD com GitHub Actions** — cada push na `main` compila e publica o APK em [Releases](https://github.com/MatheusTogni/Roots/releases/latest).
+- **CI/CD com GitHub Actions** — cada push na `main` compila e publica o APK em [Releases](https://github.com/MatheusTogni/Roots/releases/latest), numerando a versão pelo número da execução e publicando junto um `version.json`.
+- **Atualização dentro do app** ([`Updater.kt`](app/src/main/java/com/roots/app/update/Updater.kt)) — ao abrir, o app compara o `version.json` da release com a versão instalada e, se houver uma nova, mostra um card no topo da tela. O APK só é baixado quando o usuário toca em *Atualizar*, e a instalação usa o `PackageInstaller` do Android, sempre com a confirmação do sistema.
 
 ## Estrutura
 
@@ -46,12 +47,13 @@ app/src/main/java/com/roots/app/
 ├── HabitEditDialog.kt         formulário de hábito (criar, editar, excluir)
 ├── data/                      SQLite (Db, Repository) e modelos
 ├── ui/                        tema, componentes, formatação, calendário (Canvas) e matemática de datas
+├── update/                    verificação, download e instalação de versões novas
 └── widget/                    provider, lista do widget, atualização e virada do dia
 ```
 
 ## Instalação
 
-Baixe o `Roots.apk` em **[Releases → latest](https://github.com/MatheusTogni/Roots/releases/latest)** pelo celular e instale (o Android pede para permitir apps de fontes desconhecidas). Versões novas instalam por cima sem perder os dados. Para usar o widget, segure um espaço vazio da tela inicial, escolha **Widgets** e arraste o **Meus hábitos** (checklist do dia) e/ou o **Meus gráficos** (calendários).
+Baixe o `Roots.apk` em **[Releases → latest](https://github.com/MatheusTogni/Roots/releases/latest)** pelo celular e instale (o Android pede para permitir apps de fontes desconhecidas). Depois disso não é preciso voltar ao GitHub: quando sai uma versão nova, um card no topo da tela inicial do app oferece a atualização, e basta tocar em **Atualizar** e confirmar a instalação. Na primeira vez, o Android pede para permitir que o Roots instale apps. Versões novas instalam por cima sem perder os dados. Para usar o widget, segure um espaço vazio da tela inicial, escolha **Widgets** e arraste o **Meus hábitos** (checklist do dia) e/ou o **Meus gráficos** (calendários).
 
 ## Compilando
 

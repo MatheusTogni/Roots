@@ -11,8 +11,13 @@ android {
         applicationId = "com.roots.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        val buildNumber = (project.findProperty("buildNumber") as String?)?.toIntOrNull() ?: 1
+        versionCode = buildNumber
+        versionName = "1.0.$buildNumber"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     signingConfigs {
