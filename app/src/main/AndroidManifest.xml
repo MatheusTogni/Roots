@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Widget "Meus hábitos" (várias instâncias, redimensionável). -->
+        <!-- Widget "Hábitos e tarefas" (várias instâncias, redimensionável). -->
         <receiver
             android:name=".widget.HabitWidgetProvider"
             android:exported="true"

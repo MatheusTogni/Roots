@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Roots</string>
-    <string name="widget_label">Meus hábitos</string>
-    <string name="widget_description">Marque os hábitos do dia direto da tela inicial.</string>
-    <string name="widget_title">Meus hábitos</string>
+    <string name="widget_label">Hábitos e tarefas</string>
+    <string name="widget_description">Marque os hábitos e as tarefas do dia direto da tela inicial.</string>
+    <string name="widget_title">Hábitos e tarefas</string>
     <string name="widget_empty">Nenhum hábito cadastrado</string>
+    <string name="widget_habits_empty">Nenhum hábito ou tarefa para hoje</string>
     <string name="widget_graphs_label">Meus gráficos</string>
     <string name="widget_graphs_description">Veja o calendário de cada hábito, dos últimos 3 meses, direto da tela inicial.</string>
     <string name="widget_graphs_title">Meus gráficos</string>

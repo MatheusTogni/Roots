@@ -17,8 +17,9 @@ import com.roots.app.ui.ThemeSettings
 import java.time.LocalDate
 
 /**
- * Widget "Meus hábitos": lista os hábitos ativos do dia e permite marcar/desmarcar direto da tela inicial.
- * Pode haver várias instâncias; todas leem o mesmo banco e são atualizadas juntas.
+ * Widget "Hábitos e tarefas": lista os hábitos do dia e as tarefas que aparecem hoje, e permite
+ * marcar/desmarcar direto da tela inicial. Pode haver várias instâncias; todas leem o mesmo banco e são
+ * atualizadas juntas.
  */
 class HabitWidgetProvider : AppWidgetProvider() {
 
@@ -52,13 +53,16 @@ class HabitWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == ACTION_TOGGLE) {
+            // Cada linha leva o id do hábito ou o da tarefa (tabelas diferentes), nunca os dois.
             val habitId = intent.getLongExtra(EXTRA_HABIT_ID, 0L)
+            val taskId = intent.getLongExtra(EXTRA_TASK_ID, 0L)
             val shownDate = intent.getStringExtra(EXTRA_DATE)
             // A data é sempre consultada agora, no momento do toque.
             val today = LocalDate.now().toString()
-            if (habitId != 0L && shownDate == today) {
+            if ((habitId != 0L || taskId != 0L) && shownDate == today) {
                 // Grava no SQLite; o Repository avisa todos os widgets (e o app relê no onResume).
-                Repository.get(context).toggleRecord(habitId, today)
+                val repo = Repository.get(context)
+                if (taskId != 0L) repo.toggleTaskRecord(taskId, today) else repo.toggleRecord(habitId, today)
             } else {
                 // O widget ainda mostrava outro dia (virada recente): só atualiza, sem gravar no dia errado.
                 WidgetUpdater.refreshAll(context)
@@ -71,6 +75,7 @@ class HabitWidgetProvider : AppWidgetProvider() {
     companion object {
         const val ACTION_TOGGLE = "com.roots.app.action.TOGGLE_HABIT"
         const val EXTRA_HABIT_ID = "habit_id"
+        const val EXTRA_TASK_ID = "task_id"
         const val EXTRA_DATE = "date"
 
         /** Widgets mais baixos que isto (em dp) usam o layout compacto, sem cabeçalho. */

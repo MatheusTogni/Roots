@@ -39,15 +39,49 @@ class Db(context: Context) : SQLiteOpenHelper(context, "roots.db", null, VERSION
             """
         )
         db.execSQL("CREATE INDEX idx_records_date ON habit_records(date)")
-        // O app começa sem nenhum hábito: quem instala cria os seus.
+        createTaskTables(db)
+        // O app começa sem nenhum hábito nem tarefa: quem instala cria os seus.
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Migrações futuras: um bloco por versão, em ordem, sem apagar dados. Exemplo:
-        // if (oldVersion < 2) { db.execSQL("ALTER TABLE habits ADD COLUMN ...") }
+        // Migrações: um bloco por versão, em ordem, sem apagar dados. Exemplo:
+        // if (oldVersion < 3) { db.execSQL("ALTER TABLE tasks ADD COLUMN ...") }
+        if (oldVersion < 2) createTaskTables(db)
+    }
+
+    /**
+     * Tarefas (versão 2). weekdays = 0 é a tarefa normal; senão é uma máscara dos dias da semana em que a
+     * tarefa agendada aparece (bit 0 = segunda … bit 6 = domingo, ver TaskDays). task_records.date é o dia local
+     * (yyyy-MM-dd) em que a tarefa foi concluída; o UNIQUE garante no máximo um registro por tarefa/dia.
+     */
+    private fun createTaskTables(db: SQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE tasks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                icon TEXT NOT NULL,
+                color INTEGER NOT NULL,
+                created_at INTEGER NOT NULL,
+                sort_order INTEGER NOT NULL DEFAULT 0,
+                weekdays INTEGER NOT NULL DEFAULT 0
+            )
+            """
+        )
+        db.execSQL(
+            """
+            CREATE TABLE task_records (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+                date TEXT NOT NULL,
+                created_at INTEGER NOT NULL,
+                UNIQUE (task_id, date)
+            )
+            """
+        )
     }
 
     companion object {
-        const val VERSION = 1
+        const val VERSION = 2
     }
 }

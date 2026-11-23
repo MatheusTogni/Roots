@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Widget "Meus hábitos": cabeçalho (título + data) e lista rolável de hábitos. -->
+<!-- Widget "Hábitos e tarefas": cabeçalho (título + data) e lista rolável de hábitos e tarefas do dia. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -62,7 +62,7 @@
             android:layout_height="match_parent"
             android:fontFamily="sans-serif"
             android:gravity="center"
-            android:text="@string/widget_empty"
+            android:text="@string/widget_habits_empty"
             android:textColor="@color/widget_muted"
             android:textSize="13sp"
             android:visibility="gone" />

@@ -16,7 +16,7 @@ import java.time.ZoneId
  */
 object WidgetUpdater {
 
-    /** Instâncias do widget "Meus hábitos" (checklist do dia). */
+    /** Instâncias do widget "Hábitos e tarefas" (checklist do dia). */
     private fun habitWidgetIds(context: Context): IntArray =
         AppWidgetManager.getInstance(context)
             .getAppWidgetIds(ComponentName(context, HabitWidgetProvider::class.java))

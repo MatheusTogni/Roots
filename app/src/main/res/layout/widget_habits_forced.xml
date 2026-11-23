@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Widget "Meus hábitos" quando o usuário escolheu Claro ou Escuro no app: mesma estrutura de widget_habits,
+<!-- Widget "Hábitos e tarefas" quando o usuário escolheu Claro ou Escuro no app: mesma estrutura de widget_habits,
      mas sem nenhuma cor fixa. O provider pinta o fundo (widget_bg_img) e os textos com a Palette. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
@@ -71,7 +71,7 @@
                 android:layout_height="match_parent"
                 android:fontFamily="sans-serif"
                 android:gravity="center"
-                android:text="@string/widget_empty"
+                android:text="@string/widget_habits_empty"
                 android:textSize="13sp"
                 android:visibility="gone" />
         </FrameLayout>

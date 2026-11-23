@@ -14,29 +14,33 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.animation.OvershootInterpolator
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import com.roots.app.data.Habit
 import com.roots.app.data.Repository
+import com.roots.app.data.TaskDays
+import com.roots.app.data.TaskItem
 import com.roots.app.ui.BtnStyle
 import com.roots.app.ui.CARD_RADIUS
-import com.roots.app.ui.CheckCircle
 import com.roots.app.ui.Fmt
 import com.roots.app.ui.HabitCalendarCard
 import com.roots.app.ui.MonthWindow
 import com.roots.app.ui.Palette
 import com.roots.app.ui.RootsActivity
+import com.roots.app.ui.SegmentedControl
 import com.roots.app.ui.ThemeMode
 import com.roots.app.ui.ThemeSettings
 import com.roots.app.ui.ThemeTransition
+import com.roots.app.ui.TodayRow
 import com.roots.app.ui.button
 import com.roots.app.ui.card
 import com.roots.app.ui.confirm
+import com.roots.app.ui.dividedCard
 import com.roots.app.ui.dp
 import com.roots.app.ui.dpf
 import com.roots.app.ui.emojiBadge
 import com.roots.app.ui.horizontal
+import com.roots.app.ui.infoRow
 import com.roots.app.ui.lp
 import com.roots.app.ui.margins
 import com.roots.app.ui.pressScale
@@ -48,14 +52,20 @@ import com.roots.app.update.Updater
 import java.time.LocalDate
 import java.time.YearMonth
 
+/** Abas da tela inicial. */
+private enum class Tab { HABITS, TASKS }
+
 /**
- * Tela inicial: navegação de meses (vale para todos os hábitos), a lista "Hoje" para marcar
- * os hábitos do dia e um calendário independente para cada hábito.
+ * Tela inicial, com duas abas:
+ * - Hábitos: navegação de meses (vale para todos os hábitos), a lista "Hoje" para marcar os hábitos do dia e um
+ *   calendário independente para cada hábito.
+ * - Tarefas: a lista "Hoje" das tarefas (normais pendentes e agendadas para hoje) e a lista das agendadas.
  */
 class MainActivity : RootsActivity() {
 
     private val repo by lazy { Repository.get(this) }
 
+    private var tab = Tab.HABITS
     private var selectedMonth: YearMonth = YearMonth.now()
     private var today: LocalDate = LocalDate.now()
     private val cards = HashMap<Long, HabitCalendarCard>()
@@ -89,7 +99,22 @@ class MainActivity : RootsActivity() {
             useAutomaticTheme()
             true
         }
-        addFab("+") { showHabitDialog(null) { render() } }
+        addFab("+") { createNew() }
+    }
+
+    /** Botão "+": pergunta primeiro se é hábito ou tarefa e, depois de salvar, mostra a aba do que foi criado. */
+    private fun createNew() {
+        showNewItemDialog(
+            onHabit = { showHabitDialog(null) { openTab(Tab.HABITS) } },
+            onTask = { showTaskDialog(null) { openTab(Tab.TASKS) } }
+        )
+    }
+
+    private fun openTab(target: Tab) {
+        val changed = tab != target
+        tab = target
+        render()
+        if (changed) scroll.scrollTo(0, 0)
     }
 
     // ---------- Tema claro / escuro ----------
@@ -218,7 +243,25 @@ class MainActivity : RootsActivity() {
         content.removeAllViews()
         cards.clear()
         updateCardView = updateCard()?.also { content.addView(it) }
+        content.addView(tabSwitcher())
 
+        if (tab == Tab.HABITS) renderHabits() else renderTasks()
+    }
+
+    /** Seletor "Hábitos | Tarefas" no topo; fica à vista mesmo quando a aba está vazia. */
+    private fun tabSwitcher(): View {
+        val switcher = SegmentedControl(this, listOf("Hábitos", "Tarefas"), tab.ordinal) { index ->
+            tab = Tab.values()[index]
+            render()
+            scroll.scrollTo(0, 0)
+        }
+        switcher.layoutParams = lp().margins(t = dp(6), b = dp(2))
+        return switcher
+    }
+
+    // ---------- Aba Hábitos ----------
+
+    private fun renderHabits() {
         val habits = repo.habits()
         if (habits.isEmpty()) {
             emptyState(
@@ -368,48 +411,89 @@ class MainActivity : RootsActivity() {
         return button
     }
 
-    // ---------- Hoje ----------
+    // ---------- Hoje (hábitos) ----------
 
-    private fun todayCard(habits: List<Habit>, doneToday: Set<Long>, window: MonthWindow): View {
-        val box = card()
-        box.setPadding(dp(6), dp(6), dp(6), dp(6))
-        habits.forEachIndexed { index, habit ->
-            box.addView(habitRow(habit, doneToday.contains(habit.id), window))
-            if (index < habits.lastIndex) {
-                val divider = View(this)
-                divider.setBackgroundColor(Palette.BORDER)
-                box.addView(divider, lp(height = dp(1)).margins(l = dp(62), r = dp(10)))
-            }
-        }
-        return box
-    }
+    private fun todayCard(habits: List<Habit>, doneToday: Set<Long>, window: MonthWindow): View =
+        dividedCard(habits.map { habit -> habitRow(habit, doneToday.contains(habit.id), window) })
 
     private fun habitRow(habit: Habit, done: Boolean, window: MonthWindow): View {
-        val row: LinearLayout = horizontal()
-        row.setPadding(dp(10), dp(8), dp(12), dp(8))
-        row.background = ripple(rounded(0x00000000, dpf(14f)))
-        row.isClickable = true
-
-        row.addView(emojiBadge(habit.icon, habit.color, 40))
-        val name = text(habit.name, 17f, Palette.TEXT, bold = true)
-        name.maxLines = 1
-        name.ellipsize = android.text.TextUtils.TruncateAt.END
-        row.addView(name, lp(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f).margins(l = dp(12), r = dp(8)))
-        val check = CheckCircle(this, habit.color)
-        check.setChecked(done, false)
-        row.addView(check, lp(dp(30), dp(30)))
-
-        row.setOnClickListener {
+        val row = TodayRow(this, habit.icon, habit.color, habit.name, done)
+        row.view.setOnClickListener {
             // Se o dia virou com o app aberto, a lista está velha: redesenha em vez de gravar no dia errado.
             if (LocalDate.now() != today) {
                 render()
             } else {
                 val nowDone = repo.toggleRecord(habit.id, today.toString())
-                check.setChecked(nowDone, true)
+                row.setDone(nowDone, true)
                 val dates = repo.datesByHabit(window.first.toString(), window.last.toString())
                 cards[habit.id]?.refresh(dates[habit.id] ?: emptySet(), if (nowDone) today else null)
             }
         }
-        return row
+        return row.view
+    }
+
+    // ---------- Aba Tarefas ----------
+
+    private fun renderTasks() {
+        if (repo.taskCount() == 0) {
+            emptyState(
+                "✅",
+                "Nenhuma tarefa por aqui",
+                "Crie tarefas para hoje ou agende as que se repetem toda semana.",
+                "Criar minha primeira tarefa"
+            ) { showTaskDialog(null) { render() } }
+            return
+        }
+
+        sectionTitle("HOJE")
+        val items = repo.tasksFor(today)
+        if (items.isEmpty()) {
+            val empty = card()
+            empty.addView(
+                text("Tudo em dia: nada pendente para hoje.", 15f, Palette.MUTED, bold = true).apply {
+                    gravity = Gravity.CENTER
+                },
+                lp()
+            )
+            content.addView(empty)
+        } else {
+            content.addView(dividedCard(items.map { taskRow(it) }))
+            content.addView(
+                text("Toque para concluir. Segure uma tarefa para editar ou excluir.", 12f, Palette.MUTED),
+                lp().margins(l = dp(6), t = dp(2))
+            )
+        }
+
+        val scheduled = repo.scheduledTasks()
+        if (scheduled.isNotEmpty()) {
+            sectionTitle("AGENDADAS")
+            content.addView(dividedCard(scheduled.map { task ->
+                infoRow(task.icon, task.color, task.name, TaskDays.summary(task.weekdays)).also { row ->
+                    row.setOnClickListener { showTaskDialog(task) { render() } }
+                }
+            }))
+        }
+    }
+
+    /**
+     * Linha da tarefa de hoje. Concluída, fica à vista (riscada) até o fim do dia, e pode ser desmarcada;
+     * a regra de quando a tarefa some está em [Repository.tasksFor].
+     */
+    private fun taskRow(item: TaskItem): View {
+        val task = item.task
+        val row = TodayRow(this, task.icon, task.color, task.name, item.done, strikeWhenDone = true)
+        row.view.setOnClickListener {
+            // Mesma proteção dos hábitos: se o dia virou, a lista está velha, então só redesenha.
+            if (LocalDate.now() != today) {
+                render()
+            } else {
+                row.setDone(repo.toggleTaskRecord(task.id, today.toString()), true)
+            }
+        }
+        row.view.setOnLongClickListener {
+            showTaskDialog(task) { render() }
+            true
+        }
+        return row.view
     }
 }

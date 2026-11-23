@@ -8,8 +8,10 @@ import android.graphics.Path
 import android.graphics.RectF
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import android.widget.LinearLayout
 import android.widget.TextView
 import kotlin.math.min
 
@@ -138,6 +140,62 @@ class HabitPreviewStrip(context: Context, private var tint: Int) : View(context)
     private companion object {
         const val COLUMNS = 22
         const val ROWS = 3
+    }
+}
+
+/**
+ * Seletor segmentado: as opções dividem a largura e a escolhida ganha destaque. Serve às abas da tela inicial
+ * e a escolhas de duas ou três opções nos formulários. [onSelect] só é chamado quando a escolha muda.
+ */
+class SegmentedControl(
+    context: Context,
+    labels: List<String>,
+    selected: Int,
+    private val onSelect: (Int) -> Unit
+) : LinearLayout(context) {
+
+    var selected: Int = selected
+        private set
+
+    private val cells = ArrayList<TextView>()
+
+    init {
+        orientation = HORIZONTAL
+        setPadding(context.dp(4), context.dp(4), context.dp(4), context.dp(4))
+        background = rounded(Palette.INPUT_BG, context.dpf(18f), Palette.BORDER, context.dp(1))
+        labels.forEachIndexed { index, label ->
+            val cell = TextView(context).apply {
+                text = label
+                textSize = 15f
+                typeface = context.font(Weight.EXTRABOLD)
+                gravity = Gravity.CENTER
+                setPadding(context.dp(8), context.dp(10), context.dp(8), context.dp(10))
+                isClickable = true
+                setOnClickListener { choose(index) }
+            }
+            cells.add(cell)
+            addView(cell, lp(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        }
+        style()
+    }
+
+    private fun choose(index: Int) {
+        if (index == selected) return
+        selected = index
+        style()
+        onSelect(index)
+    }
+
+    private fun style() {
+        cells.forEachIndexed { i, cell ->
+            val chosen = i == selected
+            cell.setTextColor(if (chosen) Palette.ACCENT_TEXT else Palette.MUTED)
+            cell.background = if (chosen) {
+                ripple(rounded(Palette.ACCENT_SOFT, context.dpf(14f)))
+            } else {
+                ripple(rounded(0x00000000, context.dpf(14f)))
+            }
+        }
     }
 }
 
